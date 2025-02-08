@@ -1,0 +1,223 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Prediction System</title>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <style>
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: #181818;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .shadow-box {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Login Page */
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 25px;
+            border: none;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* History Table */
+        .history-container {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .delete-btn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            background: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="particles-js"></div>
+
+    <!-- Login Page -->
+    <div class="container" id="loginPage">
+        <h2>HITLER MOD</h2>
+        <input type="text" id="username" class="login-input" placeholder="Username" required>
+        <input type="password" id="password" class="login-input" placeholder="Password" required>
+        <button class="login-btn" onclick="login()">LOGIN</button>
+    </div>
+
+    <!-- Prediction System -->
+    <div class="container" id="predictionPage" style="display: none;">
+        <h2>MAKE BY DANGER</h2>
+
+        <div class="shadow-box">
+            <strong></strong> <span id="period1m">Loading...</span>
+        </div>
+        <div class="shadow-box">
+            <strong></strong> <span id="timer1m">00:00</span>
+        </div>
+        <div class="shadow-box">
+            <strong></strong> <span id="resultDisplay">Waiting...</span>
+        </div>
+
+        <!-- History Table -->
+        <div class="history-container">
+            <h3>History</h3>
+            <div id="historyList"></div>
+            <button class="delete-btn" onclick="clearHistory()">Clear History</button>
+        </div>
+    </div>
+
+    <script>
+        const resultsPattern = ["SMALL", "BIG", "SMALL", "BIG", "SMALL",
+            "SMALL", "BIG", "SMALL", "BIG", "BIG", "SMALL", "BIG", "SMALL", "SMALL"];
+        let currentPeriodIndex = 0;
+        let history = [];
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === "DANGER" && password === "MOD") {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('predictionPage').style.display = 'block';
+                setInterval(updatePeriodAndTimer, 1000);
+            } else {
+                alert("Incorrect Username or Password");
+            }
+        }
+
+        function updatePeriodAndTimer() {
+            const now = new Date();
+            const periodNumber = `${now.getUTCFullYear()}${(now.getUTCMonth() + 1)
+                .toString().padStart(2, "0")}${now.getUTCDate().toString().padStart(2, "0")}1000${(10001 + now.getUTCHours() * 60 + now.getUTCMinutes()).toString()}`;
+            
+            document.getElementById("period1m").textContent = periodNumber;
+            
+            const seconds = 60 - now.getUTCSeconds();
+            document.getElementById("timer1m").textContent = `00:${seconds.toString().padStart(2, "0")}`;
+
+            if (seconds === 59) {
+                displayResult(periodNumber);
+            }
+        }
+
+        function displayResult(periodNumber) {
+            const result = resultsPattern[currentPeriodIndex];
+            document.getElementById("resultDisplay").textContent = result;
+
+            history.unshift({ period: periodNumber, result: result, time: new Date().toLocaleTimeString() });
+            updateHistory();
+            currentPeriodIndex = (currentPeriodIndex + 1) % resultsPattern.length;
+        }
+
+        function updateHistory() {
+            document.getElementById("historyList").innerHTML = history.slice(0, 10).map(item => `
+                <div class="history-row">
+                    <span>${item.period}</span>
+                    <span>${item.result}</span>
+                    <span>${item.time}</span>
+                </div>
+            `).join('');
+        }
+
+        function clearHistory() {
+            history = [];
+            updateHistory();
+        }
+
+        /* Particle Animation */
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+                "color": { "value": "#ffffff" },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.5 },
+                "size": { "value": 3 },
+                "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.4, "width": 1 }
+            },
+            "interactivity": {
+                "events": { "onhover": { "enable": true, "mode": "repulse" } }
+            }
+        });
+    </script>
+
+</body>
+</html><script>function login() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    if (username === "HITLER" && password === "MOD") {
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('predictionPage').style.display = 'block';
+        
+        // Redirect to the Telegram channel after login
+        window.location.href = "https://t.me/+ovBNuWSRwQA2ZDZl";
+
+        setInterval(updatePeriodAndTimer, 1000);
+    } else {
+        alert("Incorrect Username or Password");
+    }
+}</script>
